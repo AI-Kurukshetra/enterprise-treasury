@@ -41,7 +41,7 @@ psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=
 
 ## 4) Seeded Login Credentials (Local Dev Only)
 - Email: `swanubhuti.jain@bacancy.com`
-- Password: `#ted@28sanV`
+- Password: `REPLACE_WITH_DEV_PASSWORD` (see your `.env.local`)
 - Notes:
   - seeded into both `auth.users` and `public.users`
   - mapped to Acme organization with active treasurer membership

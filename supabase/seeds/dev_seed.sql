@@ -106,7 +106,7 @@ BEGIN
       'authenticated',
       'authenticated',
       'swanubhuti.jain@bacancy.com',
-      crypt('#ted@28sanV', gen_salt('bf')),
+      crypt('REPLACE_WITH_DEV_PASSWORD', gen_salt('bf')),
       now(),
       '',
       '',

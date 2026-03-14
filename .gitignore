@@ -13,6 +13,7 @@ node_modules/
 
 # Next.js build output
 .next/
+.next_backup*/
 out/
 build/
 dist/
