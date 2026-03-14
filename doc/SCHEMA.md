@@ -1,0 +1,118 @@
+# Schema Notes
+
+- Added `public.job_queue` with org scoping, retry metadata, schedulable-job index coverage, and audit-trigger wiring.
+- Added `public.job_queue_claim(text[])` RPC to atomically claim runnable jobs with `FOR UPDATE SKIP LOCKED` plus transaction-scoped advisory locking.
+- Added `public.compliance_reports.result_payload jsonb` so generated report artifacts can be persisted in the database.
+- Added backend admin visibility endpoints:
+  - `GET /api/v1/jobs`
+  - `GET /api/v1/jobs/:jobId`
+- Added `public.cash_positions.restricted_balance numeric(20,6)` and refreshed `public.cash_positions_latest` so account and organization snapshots carry reserved-liquidity state.
+- Added `public.bank_accounts.region`, `public.bank_accounts.liquidity_type`, and `public.bank_accounts.withdrawal_restricted` to support regional, reserve, and trapped-cash reporting.
+- Added migration `019_live_cash_position_aggregation.sql` to backfill organization-scope `cash_positions.scope_id` with `organization_id` for stable upserts.
+- Seed data now includes:
+  - `public.currency_rates` EUR/USD and USD/EUR snapshots for live FX translation in the dashboard
+  - `public.payments` rows in `pending_approval` and `approved` states for restricted-balance calculations
+  - `public.risk_exposures` rows in watch state for the live dashboard risk counter
+- Extended `public.cash_flow_forecasts` with scenario metadata, AI narrative fields, generation status/job tracking, prompt context snapshots, publish metadata, and persisted forecast accuracy details.
+- Extended `public.cash_flow_forecast_lines` with `cumulative_balance`, `confidence_score`, `key_drivers`, and low/high balance-band columns to support daily AI forecast visualization.
+- Added `public.usage_metrics` for org-scoped Anthropic token metering, entity linkage, estimated cost tracking, and audit-trigger coverage.
+- Added import/reconciliation fields to `public.bank_statement_import_jobs`:
+  - `bank_account_id`
+  - `format`
+  - `detected_account_identifier`
+  - `total_records`
+  - `imported_count`
+  - `duplicate_count`
+  - `error_count`
+  - `warning_count`
+  - `result_summary`
+- Added `public.expected_receipts` for receipt-side reconciliation targets.
+- Added `public.transaction_reconciliations` for exact, fuzzy, and exception reconciliation decisions tied back to imported transactions.
+- Added `public.notifications` for treasury exception alerts and read-state tracking.
+- Added `public.copilot_sessions` with:
+  - `organization_id`
+  - `user_id`
+  - `title`
+  - `messages jsonb`
+  - `token_usage jsonb`
+  - `created_at`
+  - `updated_at`
+- Added `idx_copilot_sessions_org_user_updated` and `idx_copilot_sessions_user_updated` for recent-session access patterns.
+- Enabled and forced RLS on `public.copilot_sessions` with:
+  - service-role full access for backend persistence
+  - `copilot_sessions_user` select policy scoped to `user_id = auth.uid()`
+- Added `trg_audit_copilot_sessions` so copilot session inserts/updates/deletes produce immutable audit-log rows.
+- Added migration `018_reporting_suite.sql` with:
+  - `public.country_to_region(text)` for deterministic country-to-region normalization
+  - `public.report_cash_summary(uuid, date, date)` for SQL-backed cash reporting
+  - `public.report_liquidity(uuid, timestamptz)` for SQL-backed liquidity reporting
+  - `public.report_compliance_package(uuid, date, date, text)` for SQL-backed compliance evidence generation
+- Reused existing `public.compliance_reports` as the compliance archive handle; report downloads are regenerated from stored row metadata instead of introducing a second artifact table.
+- Expanded backend admin/report API coverage with:
+  - `GET /api/v1/reports/cash-summary`
+  - `GET /api/v1/reports/liquidity`
+  - `POST /api/v1/reports/compliance`
+  - `GET /api/v1/reports/compliance`
+  - `GET /api/v1/admin/audit-logs`
+  - `GET /api/v1/admin/roles`
+  - `GET /api/v1/admin/policies`
+  - `POST /api/v1/admin/users/invite`
+  - `POST /api/v1/admin/users/:userId/revoke`
+- Added migration `018_liquidity_rule_metadata.sql`:
+  - `public.sweeping_rules.rule_name text not null default 'Default sweep'`
+  - `public.sweeping_rules.max_transfer numeric(20,6) null check (max_transfer > 0 when present)`
+  - index `idx_sweeping_rules_org_pool_name` on `(organization_id, liquidity_pool_id, rule_name)`
+- Expanded liquidity API coverage with:
+  - `GET /api/v1/liquidity/pools`
+  - `POST /api/v1/liquidity/pools`
+  - `GET /api/v1/liquidity/pools/:poolId`
+  - `PATCH /api/v1/liquidity/pools/:poolId`
+  - `POST /api/v1/liquidity/pools/:poolId/sweep`
+  - `GET /api/v1/liquidity/rules`
+  - `POST /api/v1/liquidity/rules`
+  - `GET /api/v1/liquidity/intercompany`
+  - `POST /api/v1/liquidity/intercompany`
+  - `GET /api/v1/liquidity/position`
+- Added `public.risk_alerts` with org scope, severity/status tracking, related-entity linkage, resolution metadata, RLS, and audit-trigger coverage.
+- Expanded risk API coverage with:
+  - `GET /api/v1/risk/exposures`
+  - `POST /api/v1/risk/exposures/recalculate`
+  - `GET /api/v1/risk/alerts`
+  - `PATCH /api/v1/risk/alerts/:alertId`
+- Added worker coverage for `risk.recalculate`, which refreshes FX, interest-rate, counterparty, and liquidity stress calculations before persisting breach state.
+- Added migration `020_policy_enforcement_support.sql`:
+  - `public.payments.notes text null`
+- Policy-engine rules are now stored in `public.treasury_policies.rules` as:
+  - `{ "dsl": PolicyRule[] }`
+- Expanded backend admin policy coverage with:
+  - `GET /api/v1/admin/policies`
+  - `POST /api/v1/admin/policies`
+  - `GET /api/v1/admin/policies/:policyId`
+  - `PATCH /api/v1/admin/policies/:policyId`
+  - `DELETE /api/v1/admin/policies/:policyId` (deactivates for audit retention)
+  - `POST /api/v1/admin/policies/validate`
+- Payment create responses now optionally include:
+  - `policy_warnings[]` with `policyId`, `ruleId`, `action`, and `message` for post-submit UX
+- Added migration `020_notifications.sql` to evolve `public.notifications` with:
+  - `severity`
+  - `title`
+  - `body`
+  - `action_url`
+  - `action_label`
+  - `related_entity_type`
+  - `related_entity_id`
+  - `is_read`
+  - `read_at`
+  - `deleted_at`
+- Updated `public.notifications` indexing for `(user_id, is_read, created_at desc)` and `(organization_id, created_at desc)` on non-deleted rows.
+- Added RLS policy `notifications_user` for authenticated notification reads and included `public.notifications` in `supabase_realtime`.
+- Expanded notification API coverage with:
+  - `GET /api/v1/notifications`
+  - `GET /api/v1/notifications/count`
+  - `POST /api/v1/notifications/:notificationId/read`
+  - `POST /api/v1/notifications/:notificationId/unread`
+  - `POST /api/v1/notifications/read-all`
+- Added worker coverage for:
+  - `notifications.email`
+  - `notifications.webhook`
+  - `notifications.cleanup`

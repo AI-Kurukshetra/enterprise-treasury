@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 23% 97%;
+    --foreground: 213 28% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 213 28% 15%;
+    --primary: 213 28% 15%;
+    --primary-foreground: 40 23% 97%;
+    --secondary: 200 22% 93%;
+    --secondary-foreground: 213 28% 15%;
+    --muted: 200 18% 92%;
+    --muted-foreground: 212 14% 37%;
+    --accent: 28 51% 43%;
+    --accent-foreground: 40 23% 97%;
+    --success: 168 72% 30%;
+    --success-foreground: 170 56% 96%;
+    --warning: 39 84% 46%;
+    --warning-foreground: 36 100% 97%;
+    --danger: 10 76% 47%;
+    --danger-foreground: 13 100% 97%;
+    --border: 212 20% 85%;
+    --input: 212 20% 88%;
+    --ring: 28 51% 43%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translate3d(18px, -8px, 0);
+    }
+
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @keyframes notification-badge {
+    0% {
+      transform: scale(0.82);
+    }
+
+    45% {
+      transform: scale(1.12);
+    }
+
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes ping-once {
+    0% {
+      opacity: 0.85;
+      transform: scale(0.7);
+    }
+
+    100% {
+      opacity: 0;
+      transform: scale(2.1);
+    }
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    background-image:
+      radial-gradient(circle at top left, rgba(168, 106, 55, 0.12), transparent 28%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(238, 243, 245, 0.92));
+  }
+
+  ::selection {
+    background: rgba(168, 106, 55, 0.22);
+  }
+}
+
+@layer components {
+  .surface-panel {
+    @apply rounded-2xl border border-white/60 bg-white/80 shadow-panel shadow-slate-900/5 backdrop-blur-sm;
+  }
+
+  .surface-panel-dark {
+    @apply rounded-2xl border border-slate-700/70 bg-slate-950/90 text-slate-50 shadow-panel;
+  }
+
+  .eyebrow {
+    @apply font-mono text-[11px] uppercase tracking-[0.28em] text-slate-500;
+  }
+
+  .data-grid {
+    background-image: theme('backgroundImage.grid');
+    background-size: 48px 48px;
+  }
+
+  .section-frame {
+    @apply surface-panel relative overflow-hidden;
+  }
+}
+
+@layer utilities {
+  .content-auto {
+    content-visibility: auto;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .focus-ring {
+    @apply outline-none ring-2 ring-transparent transition focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  .animate-notification-badge {
+    animation: notification-badge 280ms ease-out;
+  }
+
+  .animate-ping-once {
+    animation: ping-once 700ms ease-out;
+  }
+}

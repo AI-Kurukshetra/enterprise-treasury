@@ -1,0 +1,173 @@
+# Project Changelog
+
+## 2026-03-14
+### Added
+- Initial production-oriented architecture blueprint in `docs/SYSTEM_DESIGN.md`.
+- Initial enterprise treasury schema specification in `docs/SCHEMA.md`.
+- Initial API contract specification in `docs/API_SPEC.md`.
+- Initial ADR set in `docs/DECISIONS.md`.
+- Initial milestone tracking updates in `docs/TASKS.md` and `docs/PROGRESS.md`.
+
+### Added (Frontend Treasury Command Center Milestone)
+- Added standalone frontend application under `frontend/` with:
+  - `app/(marketing)` and `app/(dashboard)` route groups
+  - shared `components`, `features`, `hooks`, and `lib` layers
+  - strict TypeScript, Tailwind CSS, and shadcn-style component primitives
+  - TanStack Query provider and API client utilities
+  - Recharts-based analytics components
+- Added enterprise marketing landing page with:
+  - hero
+  - platform overview
+  - treasury capabilities
+  - liquidity analytics
+  - risk management
+  - CTA
+- Added enterprise dashboard and treasury modules for:
+  - dashboard
+  - accounts
+  - payments
+  - transactions
+  - cash positions
+  - forecasts
+  - risk exposure
+  - investments
+  - reports
+- Added reusable financial table system and concrete implementations:
+  - `frontend/components/tables/data-table.tsx`
+  - `frontend/components/tables/account-table.tsx`
+  - `frontend/components/tables/payment-table.tsx`
+  - `frontend/components/tables/transaction-table.tsx`
+- Added live frontend API integration hooks for:
+  - accounts
+  - payments
+  - transactions
+- Added root convenience scripts for frontend lifecycle execution and validation.
+- Added frontend dependency lockfile under `frontend/package-lock.json`.
+
+### Added (Backend Service Milestone)
+- Created production backend scaffold under `backend/`:
+  - `src/services`
+  - `src/repositories`
+  - `src/schemas`
+  - `src/middleware`
+  - `src/lib`
+  - `src/utils`
+  - `src/errors`
+  - `src/types`
+  - `src/config`
+  - `api/v1`
+- Implemented domain service/repository/schema/type modules for all required treasury domains.
+- Implemented middleware stack for auth, organization context, audit logging, and payment idempotency.
+- Implemented `/api/v1` route handlers for endpoint groups defined in `docs/API_SPEC.md`.
+- Added unified error system and structured API success/error envelopes.
+- Added observability primitives (structured logging, trace IDs, request metrics counters).
+- Added Vitest test suite for core business rules and middleware/API validation paths.
+
+### Added (Supabase Database Milestone)
+- Added `supabase/` infrastructure:
+  - `supabase/migrations/`
+  - `supabase/functions/`
+  - `supabase/seeds/`
+- Added 15 deterministic SQL migrations:
+  - `001_extensions_and_enums.sql`
+  - `002_organizations_and_users.sql`
+  - `003_bank_accounts.sql`
+  - `004_transactions.sql`
+  - `005_cash_positions.sql`
+  - `006_cash_forecasts.sql`
+  - `007_payments.sql`
+  - `008_approval_workflows.sql`
+  - `009_liquidity_management.sql`
+  - `010_risk_exposures.sql`
+  - `011_investments.sql`
+  - `012_debt_facilities.sql`
+  - `013_audit_logs.sql`
+  - `014_rls_policies.sql`
+  - `015_indexes_and_performance.sql`
+- Added `supabase/seeds/dev_seed.sql` with sample organizations, users, memberships, bank accounts, transactions, and cash positions.
+- Added helper SQL functions:
+  - `current_organization_id()`
+  - `is_org_member(uuid, uuid)`
+  - `log_audit_event(...)`
+  - `validate_currency(text)`
+- Added immutable audit logging triggers and transaction/payment integrity triggers.
+- Added RLS policies and forced row-level security across public tables.
+- Added `supabase/migrations/016_operational_support_tables.sql` for:
+  - `treasury_policies`
+  - `compliance_reports`
+  - `integration_sync_jobs`
+- Added `supabase/migrations/017_financial_hardening.sql` for:
+  - security-invoker hardening on `cash_positions_latest`
+  - partition hardening helper + privilege restrictions for partition maintenance functions
+  - direct-invocation safeguards in `is_org_member`, `has_org_permission`, and `log_audit_event`
+  - precision normalization to `numeric(20,6)` for `interest_rate`, `strike_rate`, and `rate`
+- Added seeded approval workflow + approval step in `supabase/seeds/dev_seed.sql`.
+- Added SQL database validation suite:
+  - `test/database/01_rls_isolation.sql`
+  - `test/database/02_constraints_validation.sql`
+  - `test/database/03_audit_logging.sql`
+  - `test/database/04_partition_integrity.sql`
+  - `test/database/README.md`
+- Added Supabase local development runbook: `docs/SUPABASE_LOCAL_DEV.md`
+- Added request-context propagation, rate limiting middleware, error-tracking hooks, timing metrics, and a transaction-boundary utility in `backend/src/lib` and `backend/src/middleware`.
+- Added auth, admin, FX, and notifications service modules to remove direct route-handler logic from hardened backend paths.
+- Added Vitest coverage for audit logging, idempotency middleware, and rate limiting middleware.
+
+### Added (QA Automation Architecture)
+- Added a dedicated backend test architecture under `backend/tests/` with:
+  - `unit`
+  - `services`
+  - `repositories`
+  - `integration/api`
+  - `integration/database`
+  - `security`
+  - `performance`
+  - `concurrency`
+  - `e2e`
+  - `fixtures`
+  - `utils`
+- Added comprehensive treasury-focused tests for:
+  - payments
+  - transactions
+  - approvals
+  - cash positions
+  - investments
+  - financial invariants and precision handling
+  - multi-tenant isolation
+  - audit logging
+  - concurrency and idempotency controls
+  - repository query composition and DB error handling
+- Added direct route-integration coverage for dynamic Next.js API handlers across the treasury API surface.
+- Added Playwright configuration and a placeholder end-to-end payment workflow spec for frontend activation.
+- Added backend coverage enforcement via `backend/scripts/assert-coverage.mjs`.
+- Added root `package.json` scripts delegating to the backend test commands.
+
+### Changed
+- Updated root `package.json` so `dev`, `build`, and `start` target the new frontend app by default, while preserving backend test scripts.
+- Updated `docs/TASKS.md` and `docs/PROGRESS.md` to mark backend services milestone complete.
+- Updated `docs/DECISIONS.md` with PRD fallback, backend architecture, and strict TypeScript decisions.
+- Updated `docs/SCHEMA.md`, `docs/TASKS.md`, and `docs/PROGRESS.md` to reflect implemented Supabase schema and migration order.
+- Hardened `backend/src/api/route.ts` to propagate trace/request context, apply rate limiting, emit correlation headers, and capture error-tracking hooks.
+- Hardened payment creation, retry, cancellation, and approval flows to use durable idempotency records, active approval workflows, and version-guarded state transitions.
+- Corrected decimal comparison and aggregation helpers so financial assertions use deterministic fixed-scale arithmetic instead of lexicographic or floating-point behavior.
+- Updated `backend/vitest.config.ts`, `backend/package.json`, and `backend/tsconfig.json` to support the new QA architecture and coverage enforcement flow.
+- Updated testing utilities and repository mocks to support direct route invocation, idempotency repository verification, and strict typed fixtures.
+- Replaced insecure stubbed auth login responses with service-backed authentication and profile lookups.
+- Replaced placeholder transaction import behavior with repository-backed import job queueing.
+- Corrected migration policy generation in `supabase/migrations/014_rls_policies.sql` to target only base tables (prevents policy creation attempts on views).
+- Corrected `validate_currency()` null behavior in `supabase/migrations/001_extensions_and_enums.sql` to prevent domain-typed trigger variable initialization failures.
+- Updated `supabase/config.toml` seed path from `./seed.sql` to `./seeds/dev_seed.sql`.
+- Added `supabase/migrations/022_currency_rates.sql` to restore deterministic local schema coverage for FX reference rates (`currency_rates`) with RLS and performance indexes.
+- Hardened `supabase/seeds/dev_seed.sql` auth seeding for `swanubhuti.jain@bacancy.com` using resilient `auth.users` upsert logic compatible with local Supabase auth constraints.
+
+### Verified
+- `npm --prefix frontend run typecheck` passes.
+- `npm --prefix frontend run build` passes.
+- `npx tsc --noEmit` passes in `backend/`.
+- `npm test` passes in `backend/`.
+- `supabase db reset --local --no-seed` passes with migrations `001` through `017`.
+- `supabase db reset --local` passes and applies `supabase/seeds/dev_seed.sql`.
+- `supabase db reset --local` passes with migrations `001` through `018`, `021`, and `022`.
+- Seeded account credentials are present in both `auth.users` and `public.users` for `swanubhuti.jain@bacancy.com`, and password login succeeds via local Supabase Auth token endpoint.
+- Database validation scripts under `test/database/` pass against local Supabase.
+- `npm run test:coverage` passes in `backend/` with global line coverage at `94.72%`.

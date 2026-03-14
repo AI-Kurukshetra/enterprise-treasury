@@ -1,0 +1,23 @@
+{
+  "name": "enterprise-treasury-platform",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:frontend": "npm --prefix frontend run build",
+    "start:frontend": "npm --prefix frontend run start",
+    "typecheck:frontend": "npm --prefix frontend run typecheck",
+    "dev:backend": "npm --prefix backend run dev",
+    "test": "npm --prefix backend run test",
+    "test:coverage": "npm --prefix backend run test:coverage",
+    "test:e2e": "npm --prefix backend run test:e2e",
+    "dev": "npm run dev:frontend",
+    "build": "npm run build:frontend",
+    "start": "npm run start:frontend"
+  },
+  "dependencies": {
+    "next": "^15.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^4.3.6"
+  }
+}

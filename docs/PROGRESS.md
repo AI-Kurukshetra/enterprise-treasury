@@ -1,0 +1,232 @@
+# Development Progress Log
+
+## 2026-03-14
+### Completed
+- Completed deep analysis pass of current repository documentation state.
+- Authored foundational architecture document in `docs/SYSTEM_DESIGN.md`.
+- Authored comprehensive schema design and RLS strategy in `docs/SCHEMA.md`.
+- Authored API contract baseline in `docs/API_SPEC.md`.
+- Updated planning and state docs (`TASKS`, `DECISIONS`, `CHANGELOG`).
+
+### Completed (Frontend Treasury Command Center Milestone)
+- Implemented a standalone frontend application under `frontend/` using:
+  - Next.js App Router
+  - strict TypeScript
+  - Tailwind CSS
+  - shadcn-style component primitives
+  - TanStack Query
+  - Recharts
+- Created the required frontend project structure:
+  - `frontend/app/(marketing)`
+  - `frontend/app/(dashboard)`
+  - `frontend/components`
+  - `frontend/features`
+  - `frontend/hooks`
+  - `frontend/lib`
+- Built a production-oriented marketing landing page with:
+  - hero section
+  - platform overview
+  - treasury capabilities
+  - liquidity analytics
+  - risk management
+  - call-to-action
+- Built the enterprise treasury dashboard with widgets for:
+  - global cash position
+  - bank balances
+  - liquidity trends
+  - pending approvals
+  - upcoming payments
+  - risk exposure
+- Implemented treasury module pages for:
+  - accounts
+  - payments
+  - transactions
+  - cash positions
+  - forecasts
+  - risk exposure
+  - investments
+  - reports
+- Added reusable financial tables:
+  - `AccountTable`
+  - `PaymentTable`
+  - `TransactionTable`
+- Added table UX capabilities:
+  - sorting
+  - filtering
+  - pagination
+  - deferred search for large datasets
+- Added Recharts-based analytics for:
+  - cash trend graphs
+  - liquidity analytics
+  - payment volume charts
+- Connected the frontend query layer to backend APIs:
+  - `/api/v1/accounts`
+  - `/api/v1/payments`
+  - `/api/v1/transactions`
+- Added enterprise UX foundations for:
+  - dense financial layouts
+  - role-oriented navigation
+  - keyboard-focusable controls
+  - screen-reader-friendly chart and table labeling
+  - dynamic chart loading where client boundaries made sense
+- Added root scripts for frontend lifecycle commands:
+  - `npm run dev`
+  - `npm run build`
+  - `npm run start`
+  - `npm run typecheck:frontend`
+
+### Verified (Frontend Treasury Command Center Milestone)
+- `npm --prefix frontend run typecheck` passes
+- `npm --prefix frontend run build` passes
+- Static routes generated successfully for:
+  - `/`
+  - `/dashboard`
+  - `/accounts`
+  - `/payments`
+  - `/transactions`
+  - `/cash-positions`
+  - `/forecasts`
+  - `/risk-exposure`
+  - `/investments`
+  - `/reports`
+
+### Completed (Backend Service Milestone)
+- Implemented backend runtime scaffold in `backend/` with strict TypeScript configuration.
+- Implemented clean architecture separation:
+  - `src/repositories/*` for Supabase access
+  - `src/services/*` for business logic
+  - `api/v1/*` route handlers for orchestration only
+- Implemented required middleware:
+  - `authMiddleware`
+  - `organizationContextMiddleware`
+  - `auditLoggingMiddleware`
+  - `idempotencyMiddleware`
+- Implemented domain modules for:
+  - accounts
+  - transactions
+  - cash_positions
+  - payments
+  - approvals
+  - forecasts
+  - risk
+  - investments
+  - debt
+  - reports
+  - integrations
+- Added financial safety business rules for duplicate transaction prevention, currency consistency checks, idempotent payment creation, and stale approval rejection.
+- Added unified error system and API response envelope.
+- Added observability primitives (structured logs, tracing IDs, in-memory counters).
+- Added Vitest coverage for service rules, middleware enforcement, repository query helper behavior, and API validation path.
+- Verified:
+  - `npx tsc --noEmit` passes
+  - `npm test` passes
+
+### Completed (Production Readiness Hardening Audit)
+- Verified and corrected middleware ordering and request-context propagation so auth, organization, idempotency, rate limiting, and audit logging share the same correlated request metadata.
+- Replaced insecure stubbed auth login behavior with `AuthService` + `AccessRepository` backed authentication flow.
+- Added request context storage, tracing IDs, error-tracking hooks, timing metrics, and a rate-limiting middleware for sensitive routes.
+- Hardened payment and approval flows to align with the actual SQL contract:
+  - active approval workflow required on payment creation
+  - durable idempotency for payment create and retry
+  - version-token based approval race protection
+  - optimistic locking on payment status mutations
+- Added `supabase/migrations/016_operational_support_tables.sql` for `treasury_policies`, `compliance_reports`, and `integration_sync_jobs`.
+- Seeded a default approval workflow + approval step for local environments so payment creation satisfies DB integrity rules.
+- Replaced direct route-handler placeholders in admin, FX, auth logout, notifications, and transaction import endpoints with service-backed execution paths or explicit `501` behavior where integrations are still intentionally unavailable.
+- Expanded Vitest coverage for audit logging, rate limiting, and idempotency middleware paths.
+
+### Completed (Supabase Database Production Hardening Audit)
+- Audited all docs and migrations (`001` through `017`) against fintech readiness criteria.
+- Fixed a CI/CD-breaking migration defect in `014_rls_policies.sql` where policy generation attempted to target the `cash_positions_latest` view.
+- Added `017_financial_hardening.sql` with database hardening controls:
+  - closed `cash_positions_latest` cross-tenant bypass by setting the view to `security_invoker=true` and tightening grants
+  - restricted partition maintenance function execution to `postgres` and `service_role`
+  - introduced `configure_transactions_partition(regclass)` and wired it into partition creation for automatic RLS/policy/index hardening on new monthly partitions
+  - hardened `is_org_member`, `has_org_permission`, and `log_audit_event` helper behavior for safer direct invocation paths
+  - normalized financial rate precision columns to `numeric(20,6)` (`intercompany_transactions.interest_rate`, `hedging_instruments.strike_rate`, `investments.rate`)
+- Fixed `validate_currency()` null-handling in `001_extensions_and_enums.sql` so domain-typed PL/pgSQL variables no longer fail at trigger initialization.
+- Added SQL validation scripts under `test/database/`:
+  - `01_rls_isolation.sql`
+  - `02_constraints_validation.sql`
+  - `03_audit_logging.sql`
+  - `04_partition_integrity.sql`
+- Added database validation runbook at `test/database/README.md`.
+- Added Supabase local runbook at `docs/SUPABASE_LOCAL_DEV.md`.
+- Updated `supabase/config.toml` seed configuration to load `./seeds/dev_seed.sql` during `supabase db reset`.
+- Restored missing FX reference table coverage by adding `supabase/migrations/022_currency_rates.sql` with RLS, trigger-managed timestamps, and query indexes.
+- Hardened local auth credential seeding in `supabase/seeds/dev_seed.sql` to safely upsert `auth.users` by email-or-id for `swanubhuti.jain@bacancy.com`.
+- Verified locally:
+  - `supabase db reset --local --no-seed` succeeds
+  - `supabase db reset --local` succeeds and applies `supabase/seeds/dev_seed.sql`
+  - seeded account `swanubhuti.jain@bacancy.com` exists in both `auth.users` and `public.users` and is mapped to an active Acme organization membership
+  - seeded account authenticates successfully via local Supabase Auth password grant
+  - all database SQL validation scripts pass
+
+### Completed (Database Milestone)
+- Implemented full Supabase database structure:
+  - `supabase/migrations/001_extensions_and_enums.sql` through `017_financial_hardening.sql`
+  - `supabase/seeds/dev_seed.sql`
+  - `supabase/functions/README.md`
+- Implemented strict treasury-grade relational constraints and composite tenant-safe foreign keys.
+- Implemented partitioned `transactions` table by `booking_date` with proactive partition management functions.
+- Implemented financial integrity triggers for:
+  - duplicate import prevention
+  - source event replay protection
+  - transaction/payment currency consistency
+  - payment status lifecycle enforcement
+  - stale approval workflow guards
+- Implemented immutable audit logging:
+  - `audit_logs` table
+  - `log_audit_event()` helper function
+  - row-level audit triggers across core financial tables
+- Implemented RLS for all public tables with service-role override and org-membership tenant isolation.
+- Added high-volume indexing strategy for transactions, payments, risk, liquidity, cash position, and audit query paths.
+
+### Completed (QA Automation Architecture Milestone)
+- Implemented a defense-in-depth backend test architecture under `backend/tests` with dedicated suites for:
+  - `unit`
+  - `services`
+  - `repositories`
+  - `integration/api`
+  - `integration/database`
+  - `security`
+  - `performance`
+  - `concurrency`
+  - `e2e`
+  - shared `fixtures` and `utils`
+- Added fintech-critical automated coverage for:
+  - payment lifecycle and idempotency controls
+  - approval workflow state transitions
+  - financial precision and randomized invariant testing
+  - multi-tenant isolation and RLS contract validation
+  - audit logging and observability hooks
+  - repository query composition and database error mapping
+  - direct API route contract validation across accounts, transactions, payments, approvals, cash positions, forecasts, and investments
+- Added Playwright configuration and an end-to-end payment workflow spec scaffold that is intentionally `fixme` until the frontend workflow exists.
+- Added root and backend test scripts for CI:
+  - `npm run test`
+  - `npm run test:coverage`
+  - `npm run test:e2e`
+- Verified:
+  - `npm test` passes in `backend/`
+  - `npm run typecheck` passes in `backend/`
+  - `npm run test:coverage` passes in `backend/`
+- Achieved coverage:
+  - global line coverage: `94.72%`
+  - critical line coverage:
+    - payments service: `98.27%`
+    - transactions service: `96.36%`
+    - approvals service: `91.08%`
+    - multi-tenant authorization middleware: `95.23%`
+    - money utilities: `95.23%`
+
+### Current Status
+- Milestones 1, 2, 3, and 4 are now complete, along with the backend QA automation milestone.
+- Database and backend layers now have production-grade automated verification for financial correctness, replay safety, tenant isolation, repository behavior, and route-contract enforcement.
+- Frontend now has a production-grade enterprise surface for treasury marketing, dashboarding, operational modules, reusable tables, and API-backed data flows for accounts, payments, and transactions.
+- Remaining known gap: the dedicated `liquidity_management` service module described by the docs has not been implemented yet, so that scope currently has a contract placeholder test rather than executable service coverage.
+
+### Next Focus
+- Activate DB-backed runtime RLS and repository integration tests against a real Supabase or Testcontainers-backed Postgres environment.
+- Replace the placeholder Playwright workflow spec with live UI automation against the new frontend treasury flows.
+- Implement the missing `liquidity_management` service module so its tests can move from placeholder contract coverage to executable domain coverage.
