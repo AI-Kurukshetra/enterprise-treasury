@@ -1,0 +1,7 @@
+node_modules
+.next
+.next_backup*
+coverage
+test-results
+playwright-report
+npm-debug.log

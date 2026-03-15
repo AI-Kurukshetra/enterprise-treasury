@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { Suspense, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
@@ -79,7 +79,7 @@ function getFriendlyAuthError(error: AuthError) {
   return error.message;
 }
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = normalizeRedirectPath(searchParams?.get('redirectTo') ?? null);
@@ -326,5 +326,13 @@ export default function LoginPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageContent />
+    </Suspense>
   );
 }

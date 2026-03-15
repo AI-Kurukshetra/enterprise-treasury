@@ -9,7 +9,7 @@ import { buildServices } from '@/services/serviceFactory';
 const PendingApprovalSchema = z.object({
   paymentId: z.string().uuid(),
   paymentReference: z.string(),
-  amount: z.string(),
+  amount: z.union([z.string(), z.number()]).transform(String),
   currencyCode: z.string().length(3),
   valueDate: z.string(),
   createdAt: z.string(),

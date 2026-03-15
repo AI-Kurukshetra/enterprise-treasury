@@ -12,7 +12,7 @@ const InvestmentSchema = z.object({
   organization_id: z.string().uuid(),
   instrument_name: z.string(),
   instrument_type: z.string(),
-  principal_amount: z.string(),
+  principal_amount: z.union([z.string(), z.number()]).transform(String),
   currency_code: z.string().length(3),
   maturity_date: z.string(),
   status: z.enum(['active', 'matured', 'redeemed'])

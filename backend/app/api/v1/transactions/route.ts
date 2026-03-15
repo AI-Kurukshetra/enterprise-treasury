@@ -13,7 +13,7 @@ const TransactionSchema = z.object({
   bank_account_id: z.string().uuid(),
   booking_date: z.string(),
   value_date: z.string().nullable(),
-  amount: z.string(),
+  amount: z.union([z.string(), z.number()]).transform(String),
   currency_code: z.string().length(3),
   direction: z.enum(['inflow', 'outflow']),
   description: z.string().nullable(),

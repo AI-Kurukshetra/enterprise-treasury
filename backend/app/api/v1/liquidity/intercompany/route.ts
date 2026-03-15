@@ -16,7 +16,7 @@ const IntercompanyLoanSchema = z.object({
   organization_id: z.string().uuid(),
   lender_entity_id: z.string().uuid(),
   borrower_entity_id: z.string().uuid(),
-  amount: z.string(),
+  amount: z.union([z.string(), z.number()]).transform(String),
   currency_code: z.string().length(3),
   interest_rate: z.string().nullable(),
   status: z.enum(['proposed', 'active', 'settled', 'cancelled']),

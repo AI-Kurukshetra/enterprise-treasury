@@ -30,7 +30,7 @@ const CashPositionSummarySchema = z.object({
   totalCash: z.string(),
   availableLiquidity: z.string(),
   pendingPayments: z.object({
-    amount: z.string(),
+    amount: z.union([z.string(), z.number()]).transform(String),
     count: z.number().int().nonnegative()
   }),
   riskLimitsInWatch: z.number().int().nonnegative(),

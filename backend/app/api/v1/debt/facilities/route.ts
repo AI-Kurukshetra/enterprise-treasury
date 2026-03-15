@@ -12,8 +12,8 @@ const DebtFacilitySchema = z.object({
   organization_id: z.string().uuid(),
   facility_name: z.string(),
   facility_type: z.enum(['revolver', 'term_loan', 'overdraft']),
-  limit_amount: z.string(),
-  utilized_amount: z.string(),
+  limit_amount: z.union([z.string(), z.number()]).transform(String),
+  utilized_amount: z.union([z.string(), z.number()]).transform(String),
   currency_code: z.string().length(3),
   status: z.enum(['active', 'suspended', 'closed'])
 });

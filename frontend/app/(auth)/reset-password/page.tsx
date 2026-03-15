@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useState, useTransition } from 'react';
+import { FormEvent, Suspense, useEffect, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
@@ -37,7 +37,7 @@ function getTokenFromHash() {
   return { accessToken, refreshToken };
 }
 
-export default function ResetPasswordPage() {
+function ResetPasswordPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [recoveryState, setRecoveryState] = useState<RecoveryState>('loading');
@@ -259,5 +259,13 @@ export default function ResetPasswordPage() {
         </Button>
       </form>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={null}>
+      <ResetPasswordPageContent />
+    </Suspense>
   );
 }

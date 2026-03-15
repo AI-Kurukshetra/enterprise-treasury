@@ -13,13 +13,14 @@ const DEFAULT_ACCOUNT_METADATA = {
   withdrawal_restricted: false
 };
 
-function normalizeAccountMetadata<T extends Record<string, unknown>>(account: T) {
+function normalizeAccountMetadata<T extends object>(account: T) {
+  const source = account as Record<string, unknown>;
   return {
     ...DEFAULT_ACCOUNT_METADATA,
     ...account,
-    region: (account.region as string | null | undefined) ?? null,
-    liquidity_type: (account.liquidity_type as 'operating' | 'reserve' | undefined) ?? 'operating',
-    withdrawal_restricted: (account.withdrawal_restricted as boolean | undefined) ?? false
+    region: (source.region as string | null | undefined) ?? null,
+    liquidity_type: (source.liquidity_type as 'operating' | 'reserve' | undefined) ?? 'operating',
+    withdrawal_restricted: (source.withdrawal_restricted as boolean | undefined) ?? false
   };
 }
 

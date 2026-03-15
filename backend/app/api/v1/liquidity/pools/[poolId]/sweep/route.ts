@@ -11,7 +11,7 @@ const SweepExecutionResultSchema = z.object({
   pool_id: z.string().uuid(),
   status: z.enum(['executed', 'skipped']),
   reason: z.string().optional(),
-  transfer_amount: z.string().nullable(),
+  transfer_amount: z.union([z.string(), z.number()]).transform(String).nullable(),
   source_account_id: z.string().uuid(),
   target_account_id: z.string().uuid(),
   executed_at: z.string()

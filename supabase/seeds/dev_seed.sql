@@ -15,8 +15,7 @@ INSERT INTO public.users (id, email, display_name, mfa_enabled)
 VALUES
   ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 'treasurer@acme.example', 'Acme Treasurer', true),
   ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2', 'approver@acme.example', 'Acme Approver', true),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1', 'treasurer@globex.example', 'Globex Treasurer', true),
-  ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'swanubhuti.jain@bacancy.com', 'Swanubhuti Jain', true)
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1', 'treasurer@globex.example', 'Globex Treasurer', true)
 ON CONFLICT (id) DO UPDATE
 SET
   email = EXCLUDED.email,
@@ -55,8 +54,7 @@ INSERT INTO public.organization_memberships (id, organization_id, user_id, role_
 VALUES
   ('40000000-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', '10000000-0000-0000-0000-000000000001', 'active'),
   ('40000000-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2', '10000000-0000-0000-0000-000000000002', 'active'),
-  ('40000000-0000-0000-0000-000000000003', '22222222-2222-2222-2222-222222222222', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1', '20000000-0000-0000-0000-000000000001', 'active'),
-  ('40000000-0000-0000-0000-000000000004', '11111111-1111-1111-1111-111111111111', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '10000000-0000-0000-0000-000000000001', 'active')
+  ('40000000-0000-0000-0000-000000000003', '22222222-2222-2222-2222-222222222222', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1', '20000000-0000-0000-0000-000000000001', 'active')
 ON CONFLICT (organization_id, user_id) DO UPDATE
 SET
   role_id = EXCLUDED.role_id,
@@ -106,7 +104,7 @@ BEGIN
       'authenticated',
       'authenticated',
       'swanubhuti.jain@bacancy.com',
-      crypt('REPLACE_WITH_DEV_PASSWORD', gen_salt('bf')),
+      crypt('#ted@28sanV', gen_salt('bf')),
       now(),
       '',
       '',
@@ -229,7 +227,7 @@ VALUES
     '11111111-1111-1111-1111-111111111111',
     '41000000-0000-0000-0000-000000000001',
     1,
-    '10000000-0000-0000-0000-000000000002',
+    '10000000-0000-0000-0000-000000000001',
     1
   )
 ON CONFLICT (id) DO UPDATE
@@ -734,21 +732,7 @@ VALUES
     '41000000-0000-0000-0000-000000000001',
     '2026-03-14T08:45:00Z'
   )
-ON CONFLICT (id) DO UPDATE
-SET
-  payment_reference = EXCLUDED.payment_reference,
-  source_account_id = EXCLUDED.source_account_id,
-  beneficiary_counterparty_id = EXCLUDED.beneficiary_counterparty_id,
-  amount = EXCLUDED.amount,
-  currency_code = EXCLUDED.currency_code,
-  value_date = EXCLUDED.value_date,
-  purpose = EXCLUDED.purpose,
-  status = EXCLUDED.status,
-  idempotency_key = EXCLUDED.idempotency_key,
-  request_id = EXCLUDED.request_id,
-  approval_workflow_id = EXCLUDED.approval_workflow_id,
-  approved_at = EXCLUDED.approved_at,
-  updated_at = now();
+ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.risk_exposures (
   id,

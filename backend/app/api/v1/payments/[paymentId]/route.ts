@@ -48,7 +48,7 @@ const PaymentSchema = z.object({
   payment_reference: z.string(),
   source_account_id: z.string().uuid(),
   beneficiary_counterparty_id: z.string().uuid(),
-  amount: z.string(),
+  amount: z.union([z.string(), z.number()]).transform(String),
   currency_code: z.string().length(3),
   value_date: z.string(),
   purpose: z.string().nullable(),

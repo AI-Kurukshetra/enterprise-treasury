@@ -1,6 +1,8 @@
 BEGIN;
 
-CREATE TABLE IF NOT EXISTS public.notifications (
+DROP TABLE IF EXISTS public.notifications CASCADE;
+
+CREATE TABLE public.notifications (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id uuid NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
   user_id uuid REFERENCES public.users(id) ON DELETE CASCADE,
